@@ -2,10 +2,11 @@ package com.noober.helper;
 
 import com.noober.processor.HelperConfig;
 import com.noober.utils.TypeUtil;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -120,7 +121,8 @@ public class HelperClass {
 
             MethodSpec saveMethod = saveMethodBuilder.build();
             MethodSpec recoverMethod = recoverMethodBuilder.build();
-            String className = encloseElement.getSimpleName().toString() + HelperConfig.HELP_CLASS;
+
+            String className = getClassName();
             TypeSpec cacheClassTypeSpec = TypeSpec.classBuilder(className)
                     .addModifiers(Modifier.PUBLIC)
                     .addSuperinterface(ParameterizedTypeName.get(TypeUtil.IHELPER, cacheClass))
@@ -133,6 +135,14 @@ public class HelperClass {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private String getClassName() {
+//        messager.printMessage(Diagnostic.Kind.ERROR,getPackageName().toString());
+//        messager.printMessage(Diagnostic.Kind.ERROR,getPackageName().toString());
+        String qn = encloseElement.getQualifiedName().toString();
+        return qn.subSequence(getPackageName().length(),qn.length()).toString()
+                + HelperConfig.HELP_CLASS;
     }
 
     private String getPackageName() {
@@ -185,4 +195,11 @@ public class HelperClass {
         messager.printMessage(Diagnostic.Kind.NOTE, String.format(msg, args));
     }
 
+
+    public void addToTable(CodeBlock.Builder builder, String tableName) {
+        String qualifiedName = encloseElement.getQualifiedName().toString().replace("$", "$$");
+        String className = qualifiedName + HelperConfig.HELP_CLASS;
+        String supplierName = TypeUtil.SUPPLIER;
+        builder.add(tableName + ".put(\"" + qualifiedName + "\",new " + supplierName + "(){@Override public Object get(){return new " + className + "();}}" + ");\n");
+    }
 }

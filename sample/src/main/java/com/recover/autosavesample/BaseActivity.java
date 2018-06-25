@@ -9,18 +9,19 @@ import com.noober.savehelper.SaveHelper;
  * Created by Administrator on 2017/12/26.
  */
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity{
 
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		super.onRestoreInstanceState(savedInstanceState);
-		SaveHelper.recover(this, savedInstanceState);
+		SaveHelper.getInstance().recover(this, savedInstanceState);
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		SaveHelper.save(this, outState);
+		SaveHelper.getInstance().save(this, outState);
 		super.onSaveInstanceState(outState);
 	}
+
 }

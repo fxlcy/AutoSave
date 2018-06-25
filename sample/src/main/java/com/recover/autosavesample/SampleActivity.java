@@ -1,19 +1,13 @@
 package com.recover.autosavesample;
 
+import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-import android.util.Size;
 import android.util.SizeF;
-import android.util.SparseArray;
-
 
 import com.noober.api.NeedSave;
-import com.noober.savehelper.SaveHelper;
-
-import java.util.ArrayList;
 
 public class SampleActivity extends AppCompatActivity {
 
@@ -89,7 +83,7 @@ public class SampleActivity extends AppCompatActivity {
             i = savedInstanceState.getInt("ttt");
             Log.e("Sample", "onCreate1:" + i);
         }
-		SaveHelper.recover(this,savedInstanceState);
+//		SaveHelper.recover(this,savedInstanceState);
 	}
 
 	private void initData() {
@@ -99,7 +93,7 @@ public class SampleActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.e("Sample", "onSaveInstanceState");
-        SaveHelper.save(this,outState);
+//        SaveHelper.save(this,outState);
         super.onSaveInstanceState(outState);
     }
 
@@ -112,12 +106,12 @@ public class SampleActivity extends AppCompatActivity {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
-        SaveHelper.recover(this, savedInstanceState, persistentState);
+//        SaveHelper.recover(this, savedInstanceState, persistentState);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        SaveHelper.save(this, outState, outPersistentState);
+//        SaveHelper.save(this, outState, outPersistentState);
         super.onSaveInstanceState(outState, outPersistentState);
     }
 }

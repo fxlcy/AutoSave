@@ -10,7 +10,6 @@ import android.util.SparseArray;
 import android.view.View;
 
 import com.noober.api.NeedSave;
-import com.noober.savehelper.SaveHelper;
 
 /**
  * Created by xiaoqi on 18/6/21
@@ -44,7 +43,7 @@ public class CustomView extends View {
     @Override
     protected void dispatchSaveInstanceState(SparseArray<Parcelable> container) {
 
-        SaveHelper.save(this, container);
+//        SaveHelper.save(this, container);
         a = 2;
 
         Bundle bundle = new Bundle();
@@ -63,7 +62,7 @@ public class CustomView extends View {
     @Override
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
         super.dispatchRestoreInstanceState(container);
-        SaveHelper.recover(this, container);
+//        SaveHelper.recover(this, container);
         Bundle bundle = (Bundle) container.get(1);
         a = bundle.getInt("A");
         Log.e("CustomView", "dispatchRestoreInstanceState");
