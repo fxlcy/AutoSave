@@ -42,7 +42,7 @@ public class HelperSavedValues {
 	}
 
 	public boolean isPublic(){
-		Set<Modifier> set = ((Element)encloseElement).getModifiers();
+		Set<Modifier> set = encloseElement.getModifiers();
 		for(Modifier modifier : set){
 			if(modifier.equals(Modifier.PUBLIC)){
 				return true;
@@ -52,7 +52,7 @@ public class HelperSavedValues {
 	}
 
 	public boolean isPrivate(){
-		Set<Modifier> set = ((Element)encloseElement).getModifiers();
+		Set<Modifier> set = encloseElement.getModifiers();
 		for(Modifier modifier : set){
 			if(modifier.equals(Modifier.PRIVATE)){
 				return true;

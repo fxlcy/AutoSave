@@ -1,5 +1,20 @@
 apply plugin: 'com.android.library'
-apply plugin: 'bintray-release'
+apply plugin: 'maven'
+
+group = 'cn.fxlcy.plugins'
+version = '1.0.0'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            //提交到远程服务器：
+            repository(url: mavenUrl) {
+                authentication(userName: mavenUn, password: mavenPwd)
+            }
+        }
+    }
+}
+
 
 android {
     compileSdkVersion 26
@@ -33,15 +48,4 @@ dependencies {
     })
     //    provided 'com.android.support:appcompat-v7:+'
     testImplementation 'junit:junit:4.12'
-}
-
-//添加
-publish {
-    artifactId = 'savehelper'
-    userOrg = rootProject.userOrg
-    groupId = rootProject.groupId
-    uploadName = rootProject.uploadName
-    publishVersion = rootProject.publishVersion
-    desc = rootProject.description
-    website = rootProject.website
 }

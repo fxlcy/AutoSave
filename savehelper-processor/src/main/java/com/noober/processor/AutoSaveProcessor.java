@@ -6,13 +6,10 @@ import com.noober.api.Supplier;
 import com.noober.helper.HelperClass;
 import com.noober.helper.HelperSavedValues;
 import com.noober.reflect.ParameterizedTypeImpl;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeVariableName;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -35,7 +32,6 @@ import javax.lang.model.util.Types;
 
 import static com.noober.utils.TypeUtil.ABS_SAVE_HELPER;
 import static com.noober.utils.TypeUtil.SAVE_HELPER;
-import static com.noober.utils.TypeUtil.SUPPLIER;
 
 
 //@AutoService(Processor.class)
@@ -80,16 +76,17 @@ public class AutoSaveProcessor extends AbstractProcessor {
 
             TypeSpec.Builder specBuilder = TypeSpec.classBuilder("Table")
                     .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                    .addField(ParameterizedTypeImpl.make(HashMap.class, new Type[]{String.class,
+                    .addField(ParameterizedTypeImpl.make(HashMap.class, new Type[]{Class.class,
                                     Supplier.class}, null), "__MAP__"
                             , Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
-                    .addField(ParameterizedTypeImpl.make(HashMap.class, new Type[]{String.class, Object.class}, null), "__CACHE__"
-                            , Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL);
+                    .addField(ParameterizedTypeImpl.make(HashMap.class, new Type[]{Class.class, Object.class}, null), "__CACHE__"
+                            , Modifier.STATIC, Modifier.PRIVATE, Modifier.FINAL)
+                    .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
 
 
             MethodSpec.Builder findSaveHelperBuilder = MethodSpec.methodBuilder("findSaveHelper");
-            findSaveHelperBuilder.addParameter(String.class, "key")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            findSaveHelperBuilder.addParameter(Class.class, "key")
+                    .addModifiers(Modifier.STATIC)
                     .returns(Object.class)
                     .addCode("Object obj = __CACHE__.get(key);\n" +
                             "\n" +
@@ -128,7 +125,7 @@ public class AutoSaveProcessor extends AbstractProcessor {
 
 
             try {
-                JavaFile.builder("com.noober.helper", specBuilder.build())
+                JavaFile.builder("com.noober.savehelper", specBuilder.build())
                         .build()
                         .writeTo(filer);
             } catch (IOException e) {
@@ -137,7 +134,8 @@ public class AutoSaveProcessor extends AbstractProcessor {
         }
 
         TypeSpec.Builder savehelperSpecBuilder = TypeSpec.classBuilder("SaveHelper")
-                .addModifiers(Modifier.FINAL, Modifier.PUBLIC);
+                .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
+                .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
         savehelperSpecBuilder.superclass(ABS_SAVE_HELPER);
 
         MethodSpec.Builder findHelperMethodBuilder = MethodSpec.methodBuilder("findHelper")
@@ -145,7 +143,7 @@ public class AutoSaveProcessor extends AbstractProcessor {
                 .addParameter(Object.class, "save")
                 .returns(Object.class);
 
-        findHelperMethodBuilder.addCode("return com.noober.helper.Table.findSaveHelper(save.getClass().getName());\n");
+        findHelperMethodBuilder.addCode("return Table.findSaveHelper(save.getClass());\n");
 
         savehelperSpecBuilder.addMethod(findHelperMethodBuilder.build());
 
@@ -170,16 +168,11 @@ public class AutoSaveProcessor extends AbstractProcessor {
         return true;
     }
 
-    private HelperClass getHelperClass(Element element) {
+    private void getHelperClass(Element element) {
         TypeElement encloseElement = (TypeElement) element.getEnclosingElement();
         String fullClassName = encloseElement.getQualifiedName().toString();
-        HelperClass annotatedClass = mHelperClassMap.get(fullClassName);
-        if (annotatedClass == null) {
-            annotatedClass = new HelperClass(encloseElement, elementUtils, messager);
-            mHelperClassMap.put(fullClassName, annotatedClass);
-        }
+        HelperClass annotatedClass = mHelperClassMap.computeIfAbsent(fullClassName, k -> new HelperClass(encloseElement, elementUtils, messager));
         HelperSavedValues values = new HelperSavedValues(element);
         annotatedClass.addField(values);
-        return annotatedClass;
     }
 }

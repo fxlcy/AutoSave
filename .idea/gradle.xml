@@ -13,7 +13,6 @@
             <option value="$PROJECT_DIR$/savehelper" />
             <option value="$PROJECT_DIR$/savehelper-api" />
             <option value="$PROJECT_DIR$/savehelper-processor" />
-            <option value="$PROJECT_DIR$/savehelper-utils" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

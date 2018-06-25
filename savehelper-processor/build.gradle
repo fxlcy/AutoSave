@@ -1,22 +1,23 @@
 apply plugin: 'java'
-apply plugin: 'bintray-release'
+apply plugin: 'maven'
+
+group = 'cn.fxlcy.plugins'
+version = '1.0.0'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            //提交到远程服务器：
+            repository(url: mavenUrl) {
+                authentication(userName: mavenUn, password: mavenPwd)
+            }
+        }
+    }
+}
+
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.squareup:javapoet:1.9.0'
     implementation project(':savehelper-api')
-}
-
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
-
-//添加
-publish {
-    artifactId = 'processor'
-    userOrg = rootProject.userOrg
-    groupId = rootProject.groupId
-    uploadName = rootProject.uploadName
-    publishVersion = rootProject.publishVersion
-    desc = rootProject.description
-    website = rootProject.website
 }

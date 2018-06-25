@@ -1,5 +1,6 @@
 package com.noober.helper;
 
+import com.noober.api.RecoverCall;
 import com.noober.processor.HelperConfig;
 import com.noober.utils.TypeUtil;
 import com.squareup.javapoet.ClassName;
@@ -11,9 +12,11 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
@@ -42,6 +45,7 @@ public class HelperClass {
 
     public JavaFile generateCode() {
         try {
+
             TypeName cacheClass = ClassName.get(encloseElement.asType());
             MethodSpec.Builder saveMethodBuilder = MethodSpec.methodBuilder("save")
                     .addModifiers(Modifier.PUBLIC)
@@ -110,10 +114,20 @@ public class HelperClass {
                     }
 
                 }
+
                 saveMethodBuilder.endControlFlow();
                 recoverMethodBuilder.endControlFlow();
             }
 
+
+            List<? extends Element> elementList = ((TypeElement) encloseElement).getEnclosedElements();
+            for (Element element : elementList) {
+                messager.printMessage(Diagnostic.Kind.WARNING, element.getSimpleName().toString());
+                if (element.getKind() == ElementKind.METHOD && element.getAnnotation(RecoverCall.class) != null) {
+                    recoverMethodBuilder.addCode("recover." + element.getSimpleName() + "();\n");
+                    break;
+                }
+            }
 
             if (efficientElement == 0) {
                 return null;
@@ -129,6 +143,7 @@ public class HelperClass {
                     .addMethod(saveMethod)
                     .addMethod(recoverMethod)
                     .build();
+
             JavaFile javaFile = JavaFile.builder(getPackageName(), cacheClassTypeSpec).build();
             return javaFile;
         } catch (Exception e) {
@@ -138,15 +153,18 @@ public class HelperClass {
     }
 
     private String getClassName() {
-//        messager.printMessage(Diagnostic.Kind.ERROR,getPackageName().toString());
-//        messager.printMessage(Diagnostic.Kind.ERROR,getPackageName().toString());
         String qn = encloseElement.getQualifiedName().toString();
-        return qn.subSequence(getPackageName().length(),qn.length()).toString()
+        return qn.subSequence(getPackageName().length() + 1, qn.length()).toString().replace(".", "_")
                 + HelperConfig.HELP_CLASS;
     }
 
     private String getPackageName() {
         return elementUtils.getPackageOf(encloseElement).getQualifiedName().toString();
+    }
+
+
+    private String getCanNewName() {
+        return getPackageName() + "." + getClassName();
     }
 
     private String getCacheClassName() {
@@ -198,8 +216,7 @@ public class HelperClass {
 
     public void addToTable(CodeBlock.Builder builder, String tableName) {
         String qualifiedName = encloseElement.getQualifiedName().toString().replace("$", "$$");
-        String className = qualifiedName + HelperConfig.HELP_CLASS;
         String supplierName = TypeUtil.SUPPLIER;
-        builder.add(tableName + ".put(\"" + qualifiedName + "\",new " + supplierName + "(){@Override public Object get(){return new " + className + "();}}" + ");\n");
+        builder.add(tableName + ".put(" + qualifiedName + ".class,new " + supplierName + "(){@Override public Object get(){return new " + getCanNewName() + "();}}" + ");\n");
     }
 }
